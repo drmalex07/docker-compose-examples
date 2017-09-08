@@ -1,0 +1,43 @@
+
+version: '3'
+
+services:
+
+  rsyslog:
+    image: 'voxxit/rsyslog'
+    hostname: rsyslog
+    volumes:
+    - './rsyslog.conf:/etc/rsyslog.conf:ro'
+    - './data/rsyslog-logs:/var/log:rw'
+
+  webapp:
+    build:
+      context: './dockerfiles/hello-flask/'
+    image: 'local/hello-flask'
+    environment:
+      URL_PREFIX: '/helloworld'
+    volumes: [] 
+    links:
+    - 'redis:redis-server'
+    - 'rsyslog:rsyslog'
+  
+  redis:
+    image: 'redis:4.0'
+    command: redis-server /usr/local/etc/redis.conf
+    volumes:
+    - './redis.conf:/usr/local/etc/redis.conf:ro'
+    - './data/redis-data:/data'
+
+  proxy:
+    image: 'haproxy:1.7'
+    volumes:
+    - './haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro'
+    - '/var/local/lib/haproxy'
+    ports:
+    - '18090:8090'
+    - '10080:80'
+    links:
+    - 'webapp:webapp'
+    - 'rsyslog:rsyslog'
+
+volumes: {}
