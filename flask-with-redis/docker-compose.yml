@@ -4,7 +4,9 @@ version: '3'
 services:
 
   rsyslog:
-    image: 'voxxit/rsyslog'
+    build:
+      context: './dockerfiles/rsyslog/'
+    image: 'local/rsyslog'
     hostname: rsyslog
     volumes:
     - './rsyslog.conf:/etc/rsyslog.conf:ro'
